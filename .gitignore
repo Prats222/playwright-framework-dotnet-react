@@ -1,0 +1,9 @@
+**/bin/
+**/obj/
+**/node_modules/
+ClientApp/dist/
+*.tsbuildinfo
+playwright-report/
+test-results/
+.env
+.DS_Store
