@@ -131,6 +131,8 @@ nb-card .tab-bar button { position: relative; min-height: 0; padding: 0; border:
 .room-grid button.active span { border-color: var(--primary); box-shadow: 0 0 0 8px var(--primary-soft); }
 .player { text-align: center; }
 .album-art { display: grid; place-items: center; width: 112px; height: 112px; margin: 26px auto 13px; border-radius: 50%; color: white; background: linear-gradient(135deg,#598bff,#a16eff); }
+.album-art.playing { animation: album-pulse 1.4s ease-in-out infinite; }
+@keyframes album-pulse { 50% { transform: scale(1.06); box-shadow: 0 0 0 10px color-mix(in srgb, var(--primary) 15%, transparent); } }
 .album-art svg { width: 48px; height: 48px; }
 .player h4 { margin: 8px 0 2px; font-size: 20px; }
 .player p { margin: 0 0 15px; color: var(--muted); }

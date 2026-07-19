@@ -63,7 +63,7 @@ function Header({ theme, setTheme, toggleSidebar }: { theme: ThemeName; setTheme
         <button className="icon-button" aria-label="Search"><Search /></button>
         <button className="icon-button" aria-label="Messages"><Mail /></button>
         <button className="icon-button" aria-label="Notifications"><Bell /></button>
-        <div className="user"><img src="/assets/nick.png" alt="Nick Jones" /><span>Nick Jones</span></div>
+        <div className="user"><img src="/assets/nick.png" alt="Prateek Mishra" /><span>Prateek Mishra</span></div>
       </div>
     </ngx-header>
   )
@@ -194,6 +194,60 @@ function ElectricityCard() {
   </nb-card>
 }
 
+const playlistTracks = [
+  { title: 'Monsoon Drive', artist: 'Prateek Mishra', notes: [261.63, 329.63, 392, 440, 392, 329.63, 293.66, 329.63] },
+  { title: 'Mumbai Lights', artist: 'Prateek Mishra', notes: [293.66, 369.99, 440, 493.88, 440, 369.99, 329.63, 369.99] },
+  { title: 'Himalayan Dawn', artist: 'Prateek Mishra', notes: [220, 261.63, 329.63, 392, 329.63, 293.66, 261.63, 246.94] },
+]
+
+function PlaylistPlayer() {
+  const [trackIndex, setTrackIndex] = useState(0)
+  const [playing, setPlaying] = useState(false)
+  const [progress, setProgress] = useState(0)
+  const [volume, setVolume] = useState(70)
+  const audioContext = useRef<AudioContext | null>(null)
+  const noteIndex = useRef(0)
+  const track = playlistTracks[trackIndex]
+
+  useEffect(() => {
+    if (!playing) return
+    audioContext.current ??= new AudioContext()
+    const context = audioContext.current
+    void context.resume()
+    const playNote = () => {
+      const oscillator = context.createOscillator()
+      const gain = context.createGain()
+      oscillator.type = 'sine'
+      oscillator.frequency.value = track.notes[noteIndex.current % track.notes.length]
+      gain.gain.setValueAtTime(Math.max(0.0001, volume / 600), context.currentTime)
+      gain.gain.exponentialRampToValueAtTime(0.0001, context.currentTime + 0.32)
+      oscillator.connect(gain).connect(context.destination)
+      oscillator.start()
+      oscillator.stop(context.currentTime + 0.33)
+      noteIndex.current = (noteIndex.current + 1) % track.notes.length
+      setProgress(noteIndex.current / track.notes.length * 100)
+    }
+    playNote()
+    const timer = window.setInterval(playNote, 350)
+    return () => window.clearInterval(timer)
+  }, [playing, track, volume])
+
+  useEffect(() => () => { void audioContext.current?.close() }, [])
+
+  const changeTrack = (offset: number) => {
+    setTrackIndex(current => (current + offset + playlistTracks.length) % playlistTracks.length)
+    noteIndex.current = 0
+    setProgress(0)
+  }
+
+  const seek = (value: number) => {
+    noteIndex.current = Math.floor(value / 100 * track.notes.length) % track.notes.length
+    setProgress(value)
+  }
+
+  return <div className="player"><h3>My Playlist</h3><div className={`album-art ${playing ? 'playing' : ''}`}><Music2 /></div><h4>{track.title}</h4><p>{track.artist}</p><input aria-label="Track progress" type="range" value={progress} onChange={event => seek(Number(event.target.value))} /><div className="player-controls"><button aria-label="Previous track" onClick={() => changeTrack(-1)}><SkipBack /></button><button className="play" aria-label={playing ? 'Pause music' : 'Play music'} onClick={() => setPlaying(value => !value)}>{playing ? <Pause /> : <Play />}</button><button aria-label="Next track" onClick={() => changeTrack(1)}><SkipForward /></button></div><div className="volume"><Volume2 /><input aria-label="Volume" type="range" value={volume} onChange={event => setVolume(Number(event.target.value))} /></div></div>
+}
+
 function RoomsCard() {
   const [room, setRoom] = useState('Living Room')
   const rooms = ['Living Room', 'Kitchen', 'Bedroom', 'Bathroom']
@@ -201,13 +255,13 @@ function RoomsCard() {
     <div className="room-selector"><h3>Room Management</h3><div className="room-grid">
       {rooms.map((name, index) => <button className={room === name ? 'active' : ''} key={name} onClick={() => setRoom(name)}><span>{['⌂','☕','☾','◉'][index]}</span>{name}</button>)}
     </div></div>
-    <div className="player"><h3>My Playlist</h3><div className="album-art"><Music2 /></div><h4>Harder</h4><p>Daft Punk</p><input aria-label="Track progress" type="range" defaultValue="0" /><div className="player-controls"><button aria-label="Previous"><SkipBack /></button><button className="play" aria-label="Play"><Play /></button><button aria-label="Next"><SkipForward /></button></div><div className="volume"><Volume2 /><input aria-label="Volume" type="range" defaultValue="100" /></div></div>
+    <PlaylistPlayer />
   </nb-card>
 }
 
 const contacts = [
-  ['Nick Jones', 'mobile', 'nick.png'], ['Eva Moor', 'home', 'eva.png'], ['Jack Williams', 'mobile', 'jack.png'],
-  ['Lee Wong', 'mobile', 'lee.png'], ['Alan Thompson', 'home', 'alan.png'], ['Kate Martinez', 'work', 'kate.png'],
+  ['Aarav Sharma', 'mobile', 'nick.png'], ['Ananya Verma', 'home', 'eva.png'], ['Rohan Gupta', 'mobile', 'jack.png'],
+  ['Priya Singh', 'mobile', 'lee.png'], ['Vikram Patel', 'home', 'alan.png'], ['Neha Joshi', 'work', 'kate.png'],
 ]
 
 function ContactsCard() {
@@ -230,7 +284,7 @@ function TrafficCard() {
 }
 
 function WeatherCard() {
-  return <nb-card className="weather-card"><div className="weather-main"><div><span>New York</span><small>Mon 29 May</small></div><strong>20°</strong></div><div className="weather-details"><span>max <b>23°</b></span><span>min <b>19°</b></span><span>wind <b>4 km/h</b></span><span>hum <b>87%</b></span></div><div className="forecast">{[['Sun','☀','17°'],['Mon','☁','19°'],['Tue','☂','22°'],['Wed','☀','21°']].map(day => <div key={day[0]}><span>{day[0]}</span><b>{day[1]}</b><strong>{day[2]}</strong></div>)}</div></nb-card>
+  return <nb-card className="weather-card"><div className="weather-main"><div><span>Mumbai</span><small>Mon 29 May</small></div><strong>20°</strong></div><div className="weather-details"><span>max <b>23°</b></span><span>min <b>19°</b></span><span>wind <b>4 km/h</b></span><span>hum <b>87%</b></span></div><div className="forecast">{[['Sun','☀','17°'],['Mon','☁','19°'],['Tue','☂','22°'],['Wed','☀','21°']].map(day => <div key={day[0]}><span>{day[0]}</span><b>{day[1]}</b><strong>{day[2]}</strong></div>)}</div></nb-card>
 }
 
 function CamerasCard() {
@@ -254,7 +308,7 @@ function Field({ label, type = 'text', placeholder, id, ariaLabel }: { label?: s
 
 function FormLayouts() {
   return <div className="forms-layout">
-    <nb-card className="inline-form"><h3>Inline form</h3><div><input placeholder="Jane Doe" aria-label="Name" /><input placeholder="Email" aria-label="Email" /><label className="check"><input type="checkbox" /> Remember me</label><button>Submit</button></div></nb-card>
+    <nb-card className="inline-form"><h3>Inline form</h3><div><input placeholder="Prateek Mishra" aria-label="Name" /><input placeholder="Email" aria-label="Email" /><label className="check"><input type="checkbox" /> Remember me</label><button>Submit</button></div></nb-card>
     <div className="two-column-cards">
       <nb-card><h3>Using the Grid</h3><div className="grid-form"><label htmlFor="inputEmail1">Email</label><input id="inputEmail1" {...({ nbinput: '' } as object)} className="input-full-width size-medium status-basic shape-rectangle nb-transition" aria-label="Email" placeholder="Email" /><label htmlFor="grid-password">Password</label><input id="grid-password" aria-label="Password" placeholder="Password" /><span>Radios</span><div className="radio-stack"><nb-radio><label><input type="radio" name="grid-option" /> Option 1</label></nb-radio><nb-radio><label><input type="radio" name="grid-option" /> Option 2</label></nb-radio><nb-radio><label className="disabled"><input type="radio" name="grid-option" disabled defaultChecked /> Disabled Option</label></nb-radio></div><i /><button>SIGN IN</button></div></nb-card>
       <nb-card><h3>Basic Form</h3><Field label="Email address" type="email" placeholder="Email" ariaLabel="Email" /><Field label="Password" placeholder="Password" /><label className="check"><input type="checkbox" /> Check me out</label><button className="status-danger">Submit</button></nb-card>
@@ -283,19 +337,19 @@ function TooltipPage() {
 
 type Person = { id: number; first: string; last: string; username: string; email: string; age: string }
 const initialPeople: Person[] = [
-  { id: 1, first: 'Mark', last: 'Otto', username: '@mdo', email: 'mdo@gmail.com', age: '28' },
-  { id: 2, first: 'Jacob', last: 'Thornton', username: '@fat', email: 'fat@yandex.ru', age: '45' },
-  { id: 3, first: 'Larry', last: 'Bird', username: '@twitter', email: 'twitter@outlook.com', age: '18' },
-  { id: 4, first: 'John', last: 'Snow', username: '@snow', email: 'snow@gmail.com', age: '20' },
-  { id: 5, first: 'Jack', last: 'Sparrow', username: '@jack', email: 'jack@yandex.ru', age: '30' },
-  { id: 6, first: 'Ann', last: 'Smith', username: '@ann', email: 'ann@gmail.com', age: '21' },
-  { id: 7, first: 'Barbara', last: 'Black', username: '@barbara', email: 'barbara@yandex.ru', age: '43' },
-  { id: 8, first: 'Sevan', last: 'Bagrat', username: '@sevan', email: 'sevan@outlook.com', age: '13' },
-  { id: 9, first: 'Ruben', last: 'Vardan', username: '@ruben', email: 'ruben@gmail.com', age: '22' },
-  { id: 10, first: 'Karen', last: 'Sevan', username: '@karen', email: 'karen@yandex.ru', age: '33' },
-  { id: 11, first: 'Ada', last: 'Lovelace', username: '@ada', email: 'ada@example.com', age: '36' },
-  { id: 12, first: 'Grace', last: 'Hopper', username: '@grace', email: 'grace@example.com', age: '48' },
-  { id: 13, first: 'Linus', last: 'Torvalds', username: '@linus', email: 'linus@example.com', age: '40' },
+  { id: 1, first: 'Prateek', last: 'Mishra', username: '@prateek', email: 'prateek@example.com', age: '28' },
+  { id: 2, first: 'Aarav', last: 'Sharma', username: '@aarav', email: 'aarav@example.com', age: '45' },
+  { id: 3, first: 'Ananya', last: 'Verma', username: '@ananya', email: 'ananya@example.com', age: '18' },
+  { id: 4, first: 'Rohan', last: 'Gupta', username: '@rohan', email: 'rohan@example.com', age: '20' },
+  { id: 5, first: 'Priya', last: 'Singh', username: '@priya', email: 'priya@example.com', age: '30' },
+  { id: 6, first: 'Vikram', last: 'Patel', username: '@vikram', email: 'vikram@example.com', age: '21' },
+  { id: 7, first: 'Neha', last: 'Joshi', username: '@neha', email: 'neha@example.com', age: '43' },
+  { id: 8, first: 'Aditya', last: 'Rao', username: '@aditya', email: 'aditya@example.com', age: '13' },
+  { id: 9, first: 'Ishita', last: 'Nair', username: '@ishita', email: 'ishita@example.com', age: '22' },
+  { id: 10, first: 'Karan', last: 'Mehta', username: '@karan', email: 'karan@example.com', age: '33' },
+  { id: 11, first: 'Meera', last: 'Iyer', username: '@meera', email: 'meera@example.com', age: '36' },
+  { id: 12, first: 'Arjun', last: 'Kapoor', username: '@arjun', email: 'arjun@example.com', age: '48' },
+  { id: 13, first: 'Kavya', last: 'Desai', username: '@kavya', email: 'kavya@example.com', age: '40' },
 ]
 
 function SmartTable() {
@@ -371,7 +425,7 @@ function App() {
   return <div className="app-shell" data-theme={theme.toLowerCase()}>
     <Header theme={theme} setTheme={setTheme} toggleSidebar={() => setSidebarCollapsed(value => !value)} />
     <Sidebar active={page} navigate={navigate} collapsed={sidebarCollapsed} />
-    <main className={sidebarCollapsed ? 'wide' : ''}><PageContent page={page} theme={theme} /><footer className="app-footer"><span>Created with <b>♥</b> by <a href="https://akveo.com">Akveo</a> 2019</span><span>◉ ◌ ◈ ◍</span></footer></main>
+    <main className={sidebarCollapsed ? 'wide' : ''}><PageContent page={page} theme={theme} /><footer className="app-footer"><span>Created by <strong>Prateek Mishra</strong> 2026</span><span>◉ ◌ ◈ ◍</span></footer></main>
   </div>
 }
 

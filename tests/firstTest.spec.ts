@@ -17,7 +17,7 @@ test.describe('Form page navigation and locator practice', () => {
     await page.locator('#inputEmail1').fill('locator@example.com')
     await page.getByRole('textbox', { name: 'Email' }).first().click()
     await page.getByLabel('Email').first().click()
-    await page.getByPlaceholder('Jane Doe').fill('Jane Doe')
+    await page.getByPlaceholder('Prateek Mishra').fill('Prateek Mishra')
     await expect(page.getByTestId('SignIn')).toBeVisible()
   })
 
