@@ -63,7 +63,7 @@ function Header({ theme, setTheme, toggleSidebar }: { theme: ThemeName; setTheme
         <button className="icon-button" aria-label="Search"><Search /></button>
         <button className="icon-button" aria-label="Messages"><Mail /></button>
         <button className="icon-button" aria-label="Notifications"><Bell /></button>
-        <div className="user"><img src="/assets/nick.png" alt="Prateek Mishra" /><span>Prateek Mishra</span></div>
+        <div className="user"><img src="/assets/prateek-mishra.png" alt="Prateek Mishra" /><span>Prateek Mishra</span></div>
       </div>
     </ngx-header>
   )
