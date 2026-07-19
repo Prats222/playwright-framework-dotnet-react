@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: playwright-framework-dotnet-react
+    name: automation-pm
     runtime: docker
     plan: free
     region: singapore
