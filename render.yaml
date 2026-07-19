@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: playwright-framework-dotnet-react
+    runtime: docker
+    plan: free
+    region: singapore
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/health
+    autoDeployTrigger: checksPass
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+

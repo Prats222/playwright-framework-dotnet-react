@@ -24,7 +24,7 @@ export default defineConfig({
       use: { ...devices['iPhone 15'], browserName: 'chromium' },
     },
   ],
-  webServer: [
+  webServer: process.env.URL ? undefined : [
     {
       command: 'dotnet run --project Server/Server.csproj --no-launch-profile --urls http://127.0.0.1:5000',
       url: 'http://127.0.0.1:5000/api/health',

@@ -1,0 +1,13 @@
+.git
+.github
+.env
+**/bin
+**/obj
+**/node_modules
+ClientApp/dist
+playwright-report
+test-results
+*.tsbuildinfo
+Dockerfile*
+README.md
+

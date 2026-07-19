@@ -24,6 +24,7 @@ jobs:
       - run: npm ci
       - run: npm ci --prefix ClientApp
       - run: npm run build
+      - run: docker build --tag playwright-practice-app:ci .
       - run: npx playwright install --with-deps chromium
       - run: npm test
       - uses: actions/upload-artifact@v4
