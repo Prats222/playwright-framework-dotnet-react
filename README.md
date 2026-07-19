@@ -123,7 +123,7 @@ Every commit to `main` deploys after GitHub CI passes. Free services sleep after
 Test a deployed instance with:
 
 ```powershell
-$env:URL="https://playwright-framework-dotnet-react.onrender.com"
+$env:URL="https://automation-pm.onrender.com"
 npm test
 Remove-Item Env:URL
 ```
