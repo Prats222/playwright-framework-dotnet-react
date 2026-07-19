@@ -9,7 +9,7 @@ test('navigates through pages with page objects', async ({ page }) => {
   await manager.navigateTo().smartTablePage()
   await manager.navigateTo().toastrPage()
   await manager.navigateTo().tooltipPage()
-  await expect(page.getByRole('heading', { name: 'Tooltip', exact: true })).toBeVisible()
+  await expect(page.locator('nb-card', { hasText: 'Tooltip Placements' })).toBeVisible()
 })
 
 test('submits a parameterized form with page objects', async ({ page }) => {
