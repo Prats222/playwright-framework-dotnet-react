@@ -2,7 +2,8 @@ import { expect, test } from '@playwright/test'
 
 test('auto waits for delayed elements', async ({ page }) => {
   await page.goto('/')
-  await page.getByRole('button', { name: 'Load delayed result' }).click()
-  await expect(page.locator('.result-message')).toHaveText('Data loaded successfully')
+  await page.getByTitle('Modal & Overlays').click()
+  await page.getByTitle('Toastr').click()
+  await page.getByRole('button', { name: 'SHOW TOAST' }).click()
+  await expect(page.locator('.toast')).toContainText("I'm cool toaster!")
 })
-

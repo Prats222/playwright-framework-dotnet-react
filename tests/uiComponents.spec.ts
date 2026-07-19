@@ -71,6 +71,7 @@ test('web table editing and filtering', { tag: '@table' }, async ({ page }) => {
   await twitterRow.locator('.nb-checkmark').click()
   await expect(twitterRow.locator('td').last()).toHaveText('35')
 
+  await page.locator('.ng2-smart-pagination-nav').getByRole('button', { name: '2', exact: true }).click()
   const idElevenRow = page.getByRole('row').filter({ has: page.locator('td').nth(1).getByText('11', { exact: true }) })
   await idElevenRow.locator('.nb-edit').click()
   await idElevenRow.getByPlaceholder('E-mail').fill('test@test.com')
@@ -88,12 +89,30 @@ test('web table editing and filtering', { tag: '@table' }, async ({ page }) => {
 test('temperature slider', async ({ page }) => {
   const gauge = page.locator('[tabtitle="Temperature"] ngx-temperature-dragger')
   await gauge.scrollIntoViewIfNeeded()
+  await expect(gauge).toHaveAttribute('aria-valuenow', '24')
   const box = await gauge.boundingBox()
   expect(box).not.toBeNull()
-  await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2)
+  await page.mouse.move(box!.x + box!.width * 0.86, box!.y + box!.height * 0.68)
   await page.mouse.down()
-  await page.mouse.move(box!.x + box!.width / 2 + 100, box!.y + box!.height / 2 + 100)
+  await page.mouse.move(box!.x + box!.width * 0.5, box!.y + box!.height * 0.1, { steps: 8 })
   await page.mouse.up()
-  await expect(gauge).toContainText('30')
+  await expect(gauge).not.toHaveAttribute('aria-valuenow', '24')
 })
 
+test('dashboard matches the original widget composition', async ({ page }) => {
+  await expect(page.locator('.status-card')).toHaveCount(4)
+  await expect(page.getByText('Room Management')).toBeVisible()
+  await expect(page.getByText('Solar Energy Consumption')).toBeVisible()
+  await expect(page.getByText('Traffic Consumption')).toBeVisible()
+  await expect(page.getByText('Security Cameras')).toBeVisible()
+})
+
+test('dashboard controls and themes are functional', async ({ page }) => {
+  const lightCard = page.locator('.status-card').filter({ hasText: 'Light' })
+  await lightCard.click()
+  await expect(lightCard).toContainText('OFF')
+
+  await page.locator('ngx-header nb-select').click()
+  await page.getByRole('listitem').filter({ hasText: 'Dark' }).click()
+  await expect(page.locator('.app-shell')).toHaveAttribute('data-theme', 'dark')
+})

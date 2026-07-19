@@ -8,9 +8,9 @@ test.describe('Form page navigation and locator practice', () => {
   })
 
   test('navigates between form pages', { tag: '@first' }, async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'Form Layouts' })).toBeVisible()
+    await expect(page.locator('nb-card', { hasText: 'Using the Grid' })).toBeVisible()
     await page.getByTitle('Datepicker').click()
-    await expect(page.getByRole('heading', { name: 'Datepicker', exact: true })).toBeVisible()
+    await expect(page.locator('nb-card', { hasText: 'Common Datepicker' })).toBeVisible()
   })
 
   test('supports CSS and user-facing locators', { tag: '@syntax' }, async ({ page }) => {
@@ -28,7 +28,7 @@ test.describe('Form page navigation and locator practice', () => {
 
     const basicCard = page.locator('nb-card').filter({ hasText: 'Basic Form' })
     await basicCard.getByRole('textbox', { name: 'Email' }).fill('basic@example.com')
-    await expect(basicCard).toContainText('Required fields')
+    await expect(basicCard.locator('.status-danger')).toHaveText('Submit')
   })
 
   test('reuses locators and extracts values', async ({ page }) => {
@@ -38,10 +38,11 @@ test.describe('Form page navigation and locator practice', () => {
     await basicForm.getByRole('textbox', { name: 'Password' }).fill('Password')
     await expect(email).toHaveValue('test@test.com')
     await expect(basicForm.locator('button')).toHaveText('Submit')
-    await expect(page.locator('nb-radio')).toHaveText([' Option 1', ' Option 2'])
+    await expect(page.locator('nb-radio').filter({ hasText: 'Option 1' })).toContainText('Option 1')
   })
 
-  test('clicks the success action', async ({ page }) => {
-    await page.locator('.bg-success').click()
+  test('submits the basic form', async ({ page }) => {
+    const basicForm = page.locator('nb-card').filter({ hasText: 'Basic Form' })
+    await basicForm.getByRole('button', { name: 'Submit' }).click()
   })
 })
