@@ -7,6 +7,8 @@ builder.Services.AddCors(options => options.AddDefaultPolicy(policy =>
 
 var app = builder.Build();
 app.UseCors();
+app.UseDefaultFiles();
+app.UseStaticFiles();
 
 app.MapGet("/api/health", () => Results.Ok(new
 {
@@ -15,5 +17,7 @@ app.MapGet("/api/health", () => Results.Ok(new
     framework = ".NET 10 + React"
 }));
 
-app.Run();
+// React Router and client-side URLs fall back to the compiled SPA.
+app.MapFallbackToFile("index.html");
 
+app.Run();

@@ -37,3 +37,30 @@ strategies, form inputs, radio buttons, checkboxes, theme selection, tooltips,
 browser dialogs, table editing/filtering, a temperature control, page objects,
 custom fixtures, auto-waiting, and an iPhone-sized mobile project.
 
+## Free deployment on Render
+
+The repository includes a multi-stage `Dockerfile` that compiles React and
+places it in ASP.NET Core's static web root. In production, one .NET process
+serves both the website and `/api/health` on port `10000`.
+
+1. Sign in at [Render](https://dashboard.render.com/) with GitHub.
+2. Select **New > Blueprint**.
+3. Connect `Prats222/playwright-framework-dotnet-react`.
+4. Render reads `render.yaml`. Confirm that the service plan is **Free**.
+5. Select **Apply** and wait for the Docker build and health check to finish.
+6. Open the generated `https://playwright-framework-dotnet-react.onrender.com`
+   URL shown in the service dashboard.
+
+Every commit to `main` is deployed after its GitHub CI checks pass. Render free
+services sleep after a period without traffic, so the first request after idle
+can take roughly a minute.
+
+To test the deployed URL from PowerShell without starting local servers:
+
+```powershell
+$env:URL="https://your-service-name.onrender.com"
+npm test
+Remove-Item Env:URL
+```
+
+You can verify the backend directly at `https://your-service-name.onrender.com/api/health`.
