@@ -31,6 +31,35 @@ The repository contains **72 Playwright tests** across desktop Chromium and an i
 | Test architecture | User-facing locators, CSS locators, reusable locators, page objects, automatic fixtures, tags, parallel execution, and failure artifacts |
 | Mobile | Responsive form entry, navigation collapse, dashboard interaction, profile identity, and footer branding |
 
+### API and authentication test cases
+
+The focused specification is [`tests/apiAndAuth.spec.ts`](tests/apiAndAuth.spec.ts). It covers these positive and negative paths:
+
+| ID | Test case | Expected result |
+| --- | --- | --- |
+| API-01 | Get the complete product collection | `200 OK` with the seeded automation-practice data |
+| API-02 | Search products with `?search=smart` | `200 OK` with only matching products |
+| API-03 | Create a product with `POST /api/products` | `201 Created`, a generated ID, and a `Location` response header |
+| API-04 | Replace the created product with `PUT /api/products/{id}` | `200 OK` with every supplied field replaced |
+| API-05 | Partially update stock with `PATCH /api/products/{id}` | `200 OK`; changed fields update while name and price remain unchanged |
+| API-06 | Delete the created product | `204 No Content`, followed by `404 Not Found` when requested again |
+| API-07 | Submit an empty name and negative price | `400 Bad Request` with a structured validation-error object |
+| AUTH-01 | Request cookie-protected `/api/auth/me` anonymously | `401 Unauthorized` |
+| AUTH-02 | Log in with the seeded Prateek Mishra account | Account route opens and displays the authenticated identity |
+| AUTH-03 | Reload after login | HttpOnly cookie restores the authenticated session |
+| AUTH-04 | Log out and request the session endpoint again | User returns to Login and `/api/auth/me` returns `401` |
+| AUTH-05 | Log in with an incorrect password | API error is shown and no session is created |
+| AUTH-06 | Register a unique Indian demo account | `201 Created`, automatic login, and protected account access |
+| JWT-01 | Exchange valid credentials at `POST /api/auth/token` | `200 OK` with `Bearer`, one-hour expiry, and a three-part HS256 JWT |
+| JWT-02 | Send the JWT to `/api/auth/jwt-profile` | `200 OK` with Prateek Mishra and `JWT Bearer` authentication details |
+| JWT-03 | Call the JWT profile without an Authorization header | `401 Unauthorized` |
+| JWT-04 | Change the JWT signature before sending it | `401 Unauthorized` because signature validation fails |
+| UI-API-01 | Inspect the Playground request library | GET, POST, PUT, PATCH, and DELETE examples are all visible |
+| UI-API-02 | Execute a product request from the Playground | Status, duration, content type, and formatted JSON response are rendered |
+| UI-API-03 | Execute an editable POST request | JSON body is sent and the Jaipur product is displayed with status `201` |
+| UI-JWT-01 | Generate a JWT in the Playground | Token is automatically captured in the editable Bearer-token field |
+| UI-JWT-02 | Select the protected profile after token generation | Captured token is sent in `Authorization: Bearer`, and the protected identity is displayed |
+
 ### Run the tests
 
 Install the dependencies and Chromium once:
