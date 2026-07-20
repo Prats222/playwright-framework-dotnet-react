@@ -324,11 +324,12 @@ nb-card.request-library > button.active { color: var(--text) !important; border-
 .request-bar code { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .request-bar button { display: flex; align-items: center; gap: 7px; min-height: 40px; padding: 0 15px; border: 0; border-radius: 4px; color: white; background: var(--primary); font-weight: 800; }
 .request-bar button svg { width: 16px; }
-.request-body { padding: 16px 20px 20px; border-bottom: 1px solid var(--border); }
-.request-body > div { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-.request-body h3 { margin: 0; font-size: 15px; }
-.request-body span { color: var(--muted); font-size: 12px; }
-.request-body textarea { width: 100%; min-height: 155px; resize: vertical; padding: 14px; border: 1px solid var(--border); border-radius: 4px; color: #d6deeb; background: #121a2f; font: 13px/1.5 Consolas,monospace; }
+.request-body, .jwt-editor { padding: 16px 20px 20px; border-bottom: 1px solid var(--border); }
+.request-body > div, .jwt-editor > div { display: flex; justify-content: space-between; align-items: center; gap: 15px; margin-bottom: 10px; }
+.request-body h3, .jwt-editor h3 { margin: 0; font-size: 15px; }
+.request-body span, .jwt-editor span { color: var(--muted); font-size: 12px; text-align: right; }
+.request-body textarea, .jwt-editor textarea { width: 100%; min-height: 155px; resize: vertical; padding: 14px; border: 1px solid var(--border); border-radius: 4px; color: #d6deeb; background: #121a2f; font: 13px/1.5 Consolas,monospace; }
+.jwt-editor textarea { min-height: 88px; color: #a6e3a1; overflow-wrap: anywhere; }
 .response-meta { display: flex; flex-wrap: wrap; gap: 25px; padding: 16px 20px; color: var(--muted); border-bottom: 1px solid var(--border); font-size: 13px; }
 .response-meta strong { margin-left: 5px; color: var(--text); }
 .response-meta strong.ok { color: var(--success); }

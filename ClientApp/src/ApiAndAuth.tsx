@@ -92,10 +92,13 @@ export function AccountPage({ user, onLogout, navigate }: { user: SessionUser | 
 }
 
 type ApiMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
-type ApiRequest = { label: string; method: ApiMethod; path: string; body?: string }
+type ApiRequest = { label: string; method: ApiMethod; path: string; body?: string; saveJwt?: boolean; useJwt?: boolean }
 
 const requests: ApiRequest[] = [
   { label: 'Health check', method: 'GET', path: '/api/health' },
+  { label: 'Generate JWT', method: 'POST', path: '/api/auth/token', saveJwt: true, body: '{\n  "email": "prateek@automation.pm",\n  "password": "Playwright@2026"\n}' },
+  { label: 'JWT protected profile', method: 'GET', path: '/api/auth/jwt-profile', useJwt: true },
+  { label: 'Missing JWT (401)', method: 'GET', path: '/api/auth/jwt-profile' },
   { label: 'List products', method: 'GET', path: '/api/products' },
   { label: 'Find smart products', method: 'GET', path: '/api/products?search=smart' },
   { label: 'Missing product (404)', method: 'GET', path: '/api/products/99999' },
@@ -111,6 +114,7 @@ export function ApiTestingPage() {
   const [duration, setDuration] = useState<number | null>(null)
   const [body, setBody] = useState('Click SEND REQUEST to call the ASP.NET Core API.')
   const [requestBody, setRequestBody] = useState(requests[1].body ?? '')
+  const [jwtToken, setJwtToken] = useState('')
   const [contentType, setContentType] = useState('--')
   const [loading, setLoading] = useState(false)
   const request = requests[selected]
@@ -124,15 +128,19 @@ export function ApiTestingPage() {
         try { parsedBody = JSON.parse(requestBody) }
         catch { throw new Error('Request body is not valid JSON.') }
       }
+      const headers: Record<string, string> = {}
+      if (parsedBody) headers['Content-Type'] = 'application/json'
+      if (request.useJwt && jwtToken) headers.Authorization = `Bearer ${jwtToken}`
       const response = await fetch(request.path, {
         method: request.method,
         credentials: 'include',
-        headers: parsedBody ? { 'Content-Type': 'application/json' } : undefined,
+        headers,
         body: parsedBody ? JSON.stringify(parsedBody) : undefined,
       })
       setStatus(response.status)
       setContentType(response.headers.get('content-type')?.split(';')[0] ?? '(none)')
       const data = await readJson(response)
+      if (response.ok && request.saveJwt && data?.accessToken) setJwtToken(data.accessToken)
       setBody(data === null ? '(empty response)' : JSON.stringify(data, null, 2))
     } catch (reason) {
       setStatus(0)
@@ -156,6 +164,7 @@ export function ApiTestingPage() {
     <div className="api-layout"><nb-card className="request-library"><h3>Request library</h3>{requests.map((item, index) => <button key={item.label} className={selected === index ? 'active' : ''} onClick={() => setSelected(index)}><span className={`method-badge method-${item.method.toLowerCase()}`}>{item.method}</span><span>{item.label}<small>{item.path}</small></span></button>)}</nb-card>
       <nb-card className="api-console"><div className="request-bar"><span className={`method-badge method-${request.method.toLowerCase()}`}>{request.method}</span><code>{request.path}</code><button onClick={send} disabled={loading}><Play />{loading ? 'SENDING...' : 'SEND REQUEST'}</button></div>
         {request.body !== undefined && <div className="request-body"><div><h3>Request body</h3><span>application/json</span></div><textarea aria-label="JSON request body" spellCheck={false} value={requestBody} onChange={event => setRequestBody(event.target.value)} /></div>}
+        {(request.saveJwt || request.useJwt) && <div className="jwt-editor"><div><h3>Bearer token</h3><span>{jwtToken ? 'Captured - editable for negative testing' : 'Generate a JWT first'}</span></div><textarea aria-label="JWT Bearer token" spellCheck={false} placeholder="The generated access token will appear here" value={jwtToken} onChange={event => setJwtToken(event.target.value)} /></div>}
         <div className="response-meta"><span>Status <strong className={status && status < 400 ? 'ok' : 'bad'}>{status ?? '--'}</strong></span><span>Time <strong>{duration === null ? '--' : `${duration} ms`}</strong></span><span>Content <strong>{contentType}</strong></span></div>
         <div className="response-heading"><h3>Response body</h3><span>ASP.NET Core Minimal API</span></div><pre aria-label="API response">{body}</pre>
       </nb-card></div>

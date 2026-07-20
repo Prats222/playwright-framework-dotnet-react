@@ -5,7 +5,7 @@ A React recreation of the Angular/Nebular automation practice site from
 
 ## Test cases
 
-The repository contains **71 Playwright tests** across desktop Chromium and an iPhone-sized mobile project. The suite covers every implemented route, the ASP.NET Core APIs, authenticated sessions, and every meaningful interactive control in the current website.
+The repository contains **72 Playwright tests** across desktop Chromium and an iPhone-sized mobile project. The suite covers every implemented route, the ASP.NET Core APIs, cookie and JWT authentication, and every meaningful interactive control in the current website.
 
 | Area | Automated test scenarios |
 | --- | --- |
@@ -25,7 +25,7 @@ The repository contains **71 Playwright tests** across desktop Chromium and an i
 | Overlays | Dialog, Window, and Popover opening, form input, submit, close, and native confirmation handling |
 | Smart Table | Indian seed data, editing, saving, deletion, confirmation, age filtering, email changes, and pagination |
 | Other pages | Calendar grid and selected date, line chart, bar chart, and Tree Grid data |
-| Authentication | Registration, password validation, PBKDF2 password hashing, login success/failure, HttpOnly cookie persistence, protected account access, logout, request password, and reset password |
+| Authentication | Registration, password validation, PBKDF2 password hashing, login success/failure, HttpOnly cookie persistence, protected account access, logout, password flows, HS256 JWT issuance, Bearer authorization, and tampered-token rejection |
 | API testing | Health checks; product list, search, GET-by-ID, create, update, delete, validation errors, 401 responses, 404 responses, and the interactive API Playground |
 | Backend | ASP.NET Core health, authentication, session, password, and products endpoints with status-code and JSON-contract validation |
 | Test architecture | User-facing locators, CSS locators, reusable locators, page objects, automatic fixtures, tags, parallel execution, and failure artifacts |
@@ -70,7 +70,7 @@ Playwright starts the API at `http://127.0.0.1:5000` and the React application a
 - Draggable and keyboard-accessible temperature control
 - Functional smart-home toggles, room controls, dashboard selectors, camera controls, forms, tables, overlays, tooltips, charts, and calendar
 - Working registration, login, logout, session restoration, password request/reset, and a protected account screen
-- Interactive API Testing Playground with GET, POST, PUT, PATCH, and DELETE requests, editable JSON bodies, HTTP status, timing, content type, and formatted responses
+- Interactive API Testing Playground with GET, POST, PUT, PATCH, DELETE, editable JSON bodies, JWT generation, Bearer-token editing, HTTP status, timing, content type, and formatted responses
 - Browser-generated local music with three original tracks, avoiding external media dependencies
 - Client-side routing with direct-link and browser-history support
 
@@ -80,6 +80,7 @@ Playwright starts the API at `http://127.0.0.1:5000` and the React application a
 - `/api/health` health endpoint
 - `/api/products` searchable CRUD API with validation and standard HTTP status codes
 - `/api/auth/*` registration, login, logout, current-session, request-password, and reset-password endpoints
+- HS256 JWT token issuance and a Bearer-protected profile endpoint with signature, issuer, audience, and expiry validation
 - Secure PBKDF2 password hashes and encrypted HttpOnly authentication cookies
 - CORS configuration for local Vite development
 - Static React production hosting and SPA fallback routing

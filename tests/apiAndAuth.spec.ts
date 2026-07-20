@@ -44,6 +44,28 @@ test.describe('ASP.NET Core API testing', () => {
   test('protected session endpoint rejects anonymous calls', async ({ request }) => {
     expect((await request.get('/api/auth/me')).status()).toBe(401)
   })
+
+  test('JWT endpoint issues a signed token accepted only as a valid Bearer token', async ({ request }) => {
+    const tokenResponse = await request.post('/api/auth/token', {
+      data: { email: 'prateek@automation.pm', password: 'Playwright@2026' },
+    })
+    expect(tokenResponse.status()).toBe(200)
+    const tokenBody = await tokenResponse.json()
+    expect(tokenBody).toMatchObject({ tokenType: 'Bearer', expiresIn: 3600 })
+    expect(tokenBody.accessToken.split('.')).toHaveLength(3)
+
+    const profile = await request.get('/api/auth/jwt-profile', {
+      headers: { Authorization: `Bearer ${tokenBody.accessToken}` },
+    })
+    expect(profile.status()).toBe(200)
+    await expect(profile.json()).resolves.toMatchObject({
+      name: 'Prateek Mishra', email: 'prateek@automation.pm', authentication: 'JWT Bearer',
+    })
+
+    expect((await request.get('/api/auth/jwt-profile')).status()).toBe(401)
+    const tampered = `${tokenBody.accessToken.slice(0, -1)}x`
+    expect((await request.get('/api/auth/jwt-profile', { headers: { Authorization: `Bearer ${tampered}` } })).status()).toBe(401)
+  })
 })
 
 test.describe('Login and session behavior', () => {
@@ -86,7 +108,7 @@ test.describe('Login and session behavior', () => {
 
 test('API playground sends a live request and renders the response', async ({ page }) => {
   await page.goto('/pages/api-testing')
-  await expect(page.locator('.request-library .method-badge')).toHaveText(['GET', 'GET', 'GET', 'GET', 'POST', 'PUT', 'PATCH', 'DELETE'])
+  await expect(page.locator('.request-library .method-badge')).toHaveText(['GET', 'POST', 'GET', 'GET', 'GET', 'GET', 'GET', 'POST', 'PUT', 'PATCH', 'DELETE'])
   await page.getByRole('button', { name: /List products/ }).click()
   await page.getByRole('button', { name: 'SEND REQUEST' }).click()
   await expect(page.getByText('Status').locator('strong')).toHaveText('200')
@@ -97,4 +119,14 @@ test('API playground sends a live request and renders the response', async ({ pa
   await page.getByRole('button', { name: 'SEND REQUEST' }).click()
   await expect(page.getByText('Status').locator('strong')).toHaveText('201')
   await expect(page.getByLabel('API response')).toContainText('Jaipur Smart Plug')
+
+  await page.getByRole('button', { name: /Generate JWT/ }).click()
+  await page.getByRole('button', { name: 'SEND REQUEST' }).click()
+  await expect(page.getByText('Status').locator('strong')).toHaveText('200')
+  await expect(page.getByLabel('JWT Bearer token')).toHaveValue(/^eyJ.+\..+\..+$/)
+
+  await page.getByRole('button', { name: /JWT protected profile/ }).click()
+  await page.getByRole('button', { name: 'SEND REQUEST' }).click()
+  await expect(page.getByLabel('API response')).toContainText('JWT Bearer')
+  await expect(page.getByLabel('API response')).toContainText('Prateek Mishra')
 })
