@@ -70,7 +70,7 @@ Playwright starts the API at `http://127.0.0.1:5000` and the React application a
 - Draggable and keyboard-accessible temperature control
 - Functional smart-home toggles, room controls, dashboard selectors, camera controls, forms, tables, overlays, tooltips, charts, and calendar
 - Working registration, login, logout, session restoration, password request/reset, and a protected account screen
-- Interactive API Testing Playground with request library, HTTP status, timing, and formatted JSON responses
+- Interactive API Testing Playground with GET, POST, PUT, PATCH, and DELETE requests, editable JSON bodies, HTTP status, timing, content type, and formatted responses
 - Browser-generated local music with three original tracks, avoiding external media dependencies
 - Client-side routing with direct-link and browser-history support
 

@@ -142,6 +142,19 @@ productApi.MapPut("/{id:int}", (int id, ProductRequest request) =>
     products[id] = product;
     return Results.Ok(product);
 });
+productApi.MapPatch("/{id:int}", (int id, ProductPatchRequest request) =>
+{
+    if (!products.TryGetValue(id, out var current)) return Results.NotFound();
+    var name = request.Name?.Trim() ?? current.Name;
+    var category = request.Category?.Trim() ?? current.Category;
+    var price = request.Price ?? current.Price;
+    var inStock = request.InStock ?? current.InStock;
+    if (string.IsNullOrWhiteSpace(name) || price <= 0)
+        return Results.ValidationProblem(new Dictionary<string, string[]> { ["product"] = ["Name and a positive price are required."] });
+    var product = new Product(id, name, category, price, inStock);
+    products[id] = product;
+    return Results.Ok(product);
+});
 productApi.MapDelete("/{id:int}", (int id) => products.TryRemove(id, out _) ? Results.NoContent() : Results.NotFound());
 
 // React Router and client-side URLs fall back to the compiled SPA.
@@ -176,3 +189,4 @@ record ResetPasswordRequest(string Email, string NewPassword);
 record UserRecord(Guid Id, string Name, string Email, byte[] Salt, byte[] PasswordHash);
 record Product(int Id, string Name, string Category, decimal Price, bool InStock);
 record ProductRequest(string Name, string Category, decimal Price, bool InStock);
+record ProductPatchRequest(string? Name, string? Category, decimal? Price, bool? InStock);

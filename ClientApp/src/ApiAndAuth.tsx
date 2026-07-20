@@ -91,18 +91,27 @@ export function AccountPage({ user, onLogout, navigate }: { user: SessionUser | 
   </nb-card></div>
 }
 
-const requests = [
+type ApiMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
+type ApiRequest = { label: string; method: ApiMethod; path: string; body?: string }
+
+const requests: ApiRequest[] = [
   { label: 'Health check', method: 'GET', path: '/api/health' },
   { label: 'List products', method: 'GET', path: '/api/products' },
   { label: 'Find smart products', method: 'GET', path: '/api/products?search=smart' },
   { label: 'Missing product (404)', method: 'GET', path: '/api/products/99999' },
-] as const
+  { label: 'Create product', method: 'POST', path: '/api/products', body: '{\n  "name": "Jaipur Smart Plug",\n  "category": "Home Automation",\n  "price": 1799,\n  "inStock": true\n}' },
+  { label: 'Replace product', method: 'PUT', path: '/api/products/1', body: '{\n  "name": "Smart Bulb Pro",\n  "category": "Home Automation",\n  "price": 1599,\n  "inStock": true\n}' },
+  { label: 'Update stock only', method: 'PATCH', path: '/api/products/2', body: '{\n  "inStock": false\n}' },
+  { label: 'Delete product', method: 'DELETE', path: '/api/products/3' },
+]
 
 export function ApiTestingPage() {
   const [selected, setSelected] = useState(1)
   const [status, setStatus] = useState<number | null>(null)
   const [duration, setDuration] = useState<number | null>(null)
   const [body, setBody] = useState('Click SEND REQUEST to call the ASP.NET Core API.')
+  const [requestBody, setRequestBody] = useState(requests[1].body ?? '')
+  const [contentType, setContentType] = useState('--')
   const [loading, setLoading] = useState(false)
   const request = requests[selected]
 
@@ -110,8 +119,19 @@ export function ApiTestingPage() {
     setLoading(true)
     const started = performance.now()
     try {
-      const response = await fetch(request.path, { credentials: 'include' })
+      let parsedBody: unknown
+      if (requestBody.trim()) {
+        try { parsedBody = JSON.parse(requestBody) }
+        catch { throw new Error('Request body is not valid JSON.') }
+      }
+      const response = await fetch(request.path, {
+        method: request.method,
+        credentials: 'include',
+        headers: parsedBody ? { 'Content-Type': 'application/json' } : undefined,
+        body: parsedBody ? JSON.stringify(parsedBody) : undefined,
+      })
       setStatus(response.status)
+      setContentType(response.headers.get('content-type')?.split(';')[0] ?? '(none)')
       const data = await readJson(response)
       setBody(data === null ? '(empty response)' : JSON.stringify(data, null, 2))
     } catch (reason) {
@@ -123,13 +143,20 @@ export function ApiTestingPage() {
     }
   }
 
-  useEffect(() => { setStatus(null); setDuration(null); setBody('Click SEND REQUEST to call the ASP.NET Core API.') }, [selected])
+  useEffect(() => {
+    setStatus(null)
+    setDuration(null)
+    setContentType('--')
+    setRequestBody(request.body ?? '')
+    setBody('Click SEND REQUEST to call the ASP.NET Core API.')
+  }, [selected, request])
 
   return <div className="api-page">
     <div className="page-title"><div><Code2 /><span><h1>API Testing Playground</h1><p>Send real requests to the ASP.NET Core backend and inspect status, timing, headers, and JSON.</p></span></div></div>
-    <div className="api-layout"><nb-card className="request-library"><h3>Request library</h3>{requests.map((item, index) => <button key={item.label} className={selected === index ? 'active' : ''} onClick={() => setSelected(index)}><span className="method-badge">{item.method}</span><span>{item.label}<small>{item.path}</small></span></button>)}</nb-card>
-      <nb-card className="api-console"><div className="request-bar"><span className="method-badge">{request.method}</span><code>{request.path}</code><button onClick={send} disabled={loading}><Play />{loading ? 'SENDING...' : 'SEND REQUEST'}</button></div>
-        <div className="response-meta"><span>Status <strong className={status && status < 400 ? 'ok' : 'bad'}>{status ?? '--'}</strong></span><span>Time <strong>{duration === null ? '--' : `${duration} ms`}</strong></span><span>Content <strong>application/json</strong></span></div>
+    <div className="api-layout"><nb-card className="request-library"><h3>Request library</h3>{requests.map((item, index) => <button key={item.label} className={selected === index ? 'active' : ''} onClick={() => setSelected(index)}><span className={`method-badge method-${item.method.toLowerCase()}`}>{item.method}</span><span>{item.label}<small>{item.path}</small></span></button>)}</nb-card>
+      <nb-card className="api-console"><div className="request-bar"><span className={`method-badge method-${request.method.toLowerCase()}`}>{request.method}</span><code>{request.path}</code><button onClick={send} disabled={loading}><Play />{loading ? 'SENDING...' : 'SEND REQUEST'}</button></div>
+        {request.body !== undefined && <div className="request-body"><div><h3>Request body</h3><span>application/json</span></div><textarea aria-label="JSON request body" spellCheck={false} value={requestBody} onChange={event => setRequestBody(event.target.value)} /></div>}
+        <div className="response-meta"><span>Status <strong className={status && status < 400 ? 'ok' : 'bad'}>{status ?? '--'}</strong></span><span>Time <strong>{duration === null ? '--' : `${duration} ms`}</strong></span><span>Content <strong>{contentType}</strong></span></div>
         <div className="response-heading"><h3>Response body</h3><span>ASP.NET Core Minimal API</span></div><pre aria-label="API response">{body}</pre>
       </nb-card></div>
   </div>

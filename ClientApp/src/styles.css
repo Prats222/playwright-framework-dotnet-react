@@ -315,11 +315,20 @@ nb-card.request-library > button.active { color: var(--text) !important; border-
 .request-library small { overflow-wrap: anywhere; }
 .request-library small { color: var(--muted); }
 .method-badge { flex: 0 0 auto; padding: 5px 8px; border-radius: 4px; color: #087443; background: #dcfae6; font: 800 11px monospace; }
+.method-post { color: #175cd3; background: #dbeafe; }
+.method-put { color: #93370d; background: #fef0c7; }
+.method-patch { color: #5925dc; background: #ebe9fe; }
+.method-delete { color: #b42318; background: #fee4e2; }
 .api-console { overflow: hidden; }
 .request-bar { display: flex; align-items: center; gap: 12px; padding: 20px; border-bottom: 1px solid var(--border); }
 .request-bar code { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .request-bar button { display: flex; align-items: center; gap: 7px; min-height: 40px; padding: 0 15px; border: 0; border-radius: 4px; color: white; background: var(--primary); font-weight: 800; }
 .request-bar button svg { width: 16px; }
+.request-body { padding: 16px 20px 20px; border-bottom: 1px solid var(--border); }
+.request-body > div { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.request-body h3 { margin: 0; font-size: 15px; }
+.request-body span { color: var(--muted); font-size: 12px; }
+.request-body textarea { width: 100%; min-height: 155px; resize: vertical; padding: 14px; border: 1px solid var(--border); border-radius: 4px; color: #d6deeb; background: #121a2f; font: 13px/1.5 Consolas,monospace; }
 .response-meta { display: flex; flex-wrap: wrap; gap: 25px; padding: 16px 20px; color: var(--muted); border-bottom: 1px solid var(--border); font-size: 13px; }
 .response-meta strong { margin-left: 5px; color: var(--text); }
 .response-meta strong.ok { color: var(--success); }
@@ -327,7 +336,7 @@ nb-card.request-library > button.active { color: var(--text) !important; border-
 .response-heading { display: flex; align-items: center; justify-content: space-between; padding: 15px 20px; }
 .response-heading h3 { margin: 0; }
 .response-heading span { color: var(--muted); font-size: 12px; }
-.api-console pre { min-height: 390px; margin: 0; padding: 22px; overflow: auto; color: #d6deeb; background: #121a2f; font: 13px/1.6 Consolas,monospace; }
+.api-console pre { min-height: 300px; margin: 0; padding: 22px; overflow: auto; color: #d6deeb; background: #121a2f; font: 13px/1.6 Consolas,monospace; }
 
 @media (max-width: 1500px) {
   .status-grid { grid-template-columns: repeat(2,1fr); }

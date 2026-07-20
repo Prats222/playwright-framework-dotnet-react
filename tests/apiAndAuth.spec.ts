@@ -25,6 +25,10 @@ test.describe('ASP.NET Core API testing', () => {
     expect(updated.status()).toBe(200)
     await expect(updated.json()).resolves.toMatchObject({ name: 'Pune Test Sensor Pro', inStock: false })
 
+    const patched = await request.patch(`/api/products/${product.id}`, { data: { inStock: true } })
+    expect(patched.status()).toBe(200)
+    await expect(patched.json()).resolves.toMatchObject({ name: 'Pune Test Sensor Pro', price: 2499, inStock: true })
+
     expect((await request.delete(`/api/products/${product.id}`)).status()).toBe(204)
     expect((await request.get(`/api/products/${product.id}`)).status()).toBe(404)
   })
@@ -82,8 +86,15 @@ test.describe('Login and session behavior', () => {
 
 test('API playground sends a live request and renders the response', async ({ page }) => {
   await page.goto('/pages/api-testing')
+  await expect(page.locator('.request-library .method-badge')).toHaveText(['GET', 'GET', 'GET', 'GET', 'POST', 'PUT', 'PATCH', 'DELETE'])
   await page.getByRole('button', { name: /List products/ }).click()
   await page.getByRole('button', { name: 'SEND REQUEST' }).click()
   await expect(page.getByText('Status').locator('strong')).toHaveText('200')
   await expect(page.getByLabel('API response')).toContainText('Smart Bulb')
+
+  await page.getByRole('button', { name: /Create product/ }).click()
+  await expect(page.getByLabel('JSON request body')).toHaveValue(/Jaipur Smart Plug/)
+  await page.getByRole('button', { name: 'SEND REQUEST' }).click()
+  await expect(page.getByText('Status').locator('strong')).toHaveText('201')
+  await expect(page.getByLabel('API response')).toContainText('Jaipur Smart Plug')
 })
