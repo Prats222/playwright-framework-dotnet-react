@@ -5,12 +5,12 @@ A React recreation of the Angular/Nebular automation practice site from
 
 ## Test cases
 
-The repository contains **64 Playwright tests** across desktop Chromium and an iPhone-sized mobile project. The suite covers every implemented route and every meaningful interactive control in the current website.
+The repository contains **71 Playwright tests** across desktop Chromium and an iPhone-sized mobile project. The suite covers every implemented route, the ASP.NET Core APIs, authenticated sessions, and every meaningful interactive control in the current website.
 
 | Area | Automated test scenarios |
 | --- | --- |
 | Branding | Prateek Mishra header identity, supplied profile photo load, personalized footer, and mobile branding |
-| Routing | All 16 application deep links, sidebar navigation, URL updates, browser back navigation, and unknown-route fallback |
+| Routing | Application deep links, sidebar navigation, URL updates, browser back navigation, and unknown-route fallback |
 | Header and themes | Theme menu contents and switching through Light, Dark, Cosmic, and Corporate themes |
 | Smart-home cards | Independent ON/OFF behavior for Light, Roller Shades, Wireless Audio, and Coffee Maker |
 | Temperature and humidity | Pointer dragging, keyboard changes, power off/on, tab switching, accessible slider values, and four operating modes |
@@ -25,8 +25,9 @@ The repository contains **64 Playwright tests** across desktop Chromium and an i
 | Overlays | Dialog, Window, and Popover opening, form input, submit, close, and native confirmation handling |
 | Smart Table | Indian seed data, editing, saving, deletion, confirmation, age filtering, email changes, and pagination |
 | Other pages | Calendar grid and selected date, line chart, bar chart, and Tree Grid data |
-| Authentication | Login, Register, Request Password, and Reset Password routes, headings, email fields, password-field counts, and actions |
-| Backend | ASP.NET Core `/api/health` status, application name, and framework response |
+| Authentication | Registration, password validation, PBKDF2 password hashing, login success/failure, HttpOnly cookie persistence, protected account access, logout, request password, and reset password |
+| API testing | Health checks; product list, search, GET-by-ID, create, update, delete, validation errors, 401 responses, 404 responses, and the interactive API Playground |
+| Backend | ASP.NET Core health, authentication, session, password, and products endpoints with status-code and JSON-contract validation |
 | Test architecture | User-facing locators, CSS locators, reusable locators, page objects, automatic fixtures, tags, parallel execution, and failure artifacts |
 | Mobile | Responsive form entry, navigation collapse, dashboard interaction, profile identity, and footer branding |
 
@@ -50,6 +51,7 @@ Useful focused commands:
 
 ```powershell
 npx playwright test tests/comprehensiveCoverage.spec.ts
+npx playwright test tests/apiAndAuth.spec.ts
 npx playwright test --project=mobile
 npx playwright test --grep "music player"
 npm run test:headed
@@ -66,7 +68,9 @@ Playwright starts the API at `http://127.0.0.1:5000` and the React application a
 - Angular/Nebular-inspired responsive dashboard with Light, Dark, Cosmic, and Corporate themes
 - Personalized Prateek Mishra profile and footer
 - Draggable and keyboard-accessible temperature control
-- Functional smart-home toggles, room controls, dashboard selectors, camera controls, forms, tables, overlays, tooltips, charts, calendar, and authentication screens
+- Functional smart-home toggles, room controls, dashboard selectors, camera controls, forms, tables, overlays, tooltips, charts, and calendar
+- Working registration, login, logout, session restoration, password request/reset, and a protected account screen
+- Interactive API Testing Playground with request library, HTTP status, timing, and formatted JSON responses
 - Browser-generated local music with three original tracks, avoiding external media dependencies
 - Client-side routing with direct-link and browser-history support
 
@@ -74,8 +78,13 @@ Playwright starts the API at `http://127.0.0.1:5000` and the React application a
 
 - ASP.NET Core 10 minimal API
 - `/api/health` health endpoint
+- `/api/products` searchable CRUD API with validation and standard HTTP status codes
+- `/api/auth/*` registration, login, logout, current-session, request-password, and reset-password endpoints
+- Secure PBKDF2 password hashes and encrypted HttpOnly authentication cookies
 - CORS configuration for local Vite development
 - Static React production hosting and SPA fallback routing
+
+The seeded demonstration account is `prateek@automation.pm` with password `Playwright@2026`. Registered users and product changes are intentionally stored in memory for this automation-practice site, so they reset whenever the free Render service restarts.
 
 ### Project structure
 
@@ -110,7 +119,7 @@ npm run build
 
 ## Free deployment on Render
 
-The multi-stage `Dockerfile` compiles React and places it in ASP.NET Core's static web root. One .NET process serves both the website and `/api/health` on Render's free plan.
+The multi-stage `Dockerfile` compiles React and places it in ASP.NET Core's static web root. One .NET process serves the website, authentication, and all `/api/*` endpoints on Render's free plan.
 
 1. Sign in at [Render](https://dashboard.render.com/) with GitHub.
 2. Select **New > Blueprint**.

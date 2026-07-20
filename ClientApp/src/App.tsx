@@ -5,13 +5,14 @@ import {
   PieChart, Play, Power, Search, Settings, SkipBack, SkipForward, Sliders,
   Snowflake, Speaker, Sun, Trash2, Volume2, Waves, Wind, X,
 } from 'lucide-react'
+import { AccountPage, ApiTestingPage, AuthPage, SessionUser } from './ApiAndAuth'
 
 type ThemeName = 'Light' | 'Dark' | 'Cosmic' | 'Corporate'
 type PageName =
   | 'IoT Dashboard' | 'Form Layouts' | 'Datepicker' | 'Dialog' | 'Window'
   | 'Popover' | 'Toastr' | 'Tooltip' | 'Calendar' | 'Echarts'
   | 'Smart Table' | 'Tree Grid' | 'Login' | 'Register'
-  | 'Request Password' | 'Reset Password'
+  | 'Request Password' | 'Reset Password' | 'Account' | 'API Testing'
 
 const pagePaths: Record<PageName, string> = {
   'IoT Dashboard': '/pages/iot-dashboard',
@@ -28,6 +29,7 @@ const pagePaths: Record<PageName, string> = {
   'Tree Grid': '/pages/tables/tree-grid',
   Login: '/auth/login', Register: '/auth/register',
   'Request Password': '/auth/request-password', 'Reset Password': '/auth/reset-password',
+  Account: '/auth/account', 'API Testing': '/pages/api-testing',
 }
 
 const pathPages = Object.fromEntries(Object.entries(pagePaths).map(([page, path]) => [path, page])) as Record<string, PageName>
@@ -38,7 +40,8 @@ const menuGroups = [
   { name: 'Extra Components', icon: MessageCircle, items: ['Calendar'] as PageName[] },
   { name: 'Charts', icon: PieChart, items: ['Echarts'] as PageName[] },
   { name: 'Tables & Data', icon: Grid2X2, items: ['Smart Table', 'Tree Grid'] as PageName[] },
-  { name: 'Auth', icon: Lock, items: ['Login', 'Register', 'Request Password', 'Reset Password'] as PageName[] },
+  { name: 'Testing', icon: Sliders, items: ['API Testing'] as PageName[] },
+  { name: 'Auth', icon: Lock, items: ['Login', 'Register', 'Request Password', 'Reset Password', 'Account'] as PageName[] },
 ]
 
 const themes: ThemeName[] = ['Light', 'Dark', 'Cosmic', 'Corporate']
@@ -387,11 +390,7 @@ function TreeGridPage() {
   return <nb-card><h3>Tree Grid</h3><div className="tree-grid"><div><b>Project</b><b>Kind</b><b>Size</b></div>{[['▾ ngx-admin','Folder','4.2 MB'],['  ├ Dashboard','Page','1.3 MB'],['  ├ Forms','Page','920 KB'],['  └ Tables','Page','860 KB']].map(row => <div key={row[0]}><span>{row[0]}</span><span>{row[1]}</span><span>{row[2]}</span></div>)}</div></nb-card>
 }
 
-function AuthPage({ type }: { type: PageName }) {
-  return <div className="auth-page"><nb-card><h1>{type}</h1><p>{type === 'Login' ? 'Hello! Log in with your email.' : 'Enter your details below.'}</p><Field label="Email address" placeholder="Email address" />{type !== 'Request Password' && <Field label="Password" type="password" placeholder="Password" />}{type === 'Register' && <Field label="Confirm password" type="password" placeholder="Confirm password" />}<button>{type.toUpperCase()}</button></nb-card></div>
-}
-
-function PageContent({ page, theme }: { page: PageName; theme: ThemeName }) {
+function PageContent({ page, theme, user, setUser, navigate }: { page: PageName; theme: ThemeName; user: SessionUser | null; setUser: (user: SessionUser | null) => void; navigate: (page: PageName) => void }) {
   if (page === 'IoT Dashboard') return <Dashboard theme={theme} />
   if (page === 'Form Layouts') return <FormLayouts />
   if (page === 'Datepicker') return <DatepickerPage />
@@ -402,13 +401,16 @@ function PageContent({ page, theme }: { page: PageName; theme: ThemeName }) {
   if (page === 'Calendar') return <CalendarPage />
   if (page === 'Echarts') return <EchartsPage />
   if (page === 'Tree Grid') return <TreeGridPage />
-  return <AuthPage type={page} />
+  if (page === 'API Testing') return <ApiTestingPage />
+  if (page === 'Account') return <AccountPage user={user} onLogout={() => setUser(null)} navigate={navigate} />
+  return <AuthPage type={page} onAuthenticated={setUser} navigate={navigate} />
 }
 
 function App() {
   const [page, setPage] = useState<PageName>(() => pathPages[window.location.pathname] ?? 'IoT Dashboard')
   const [theme, setTheme] = useState<ThemeName>('Light')
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  const [user, setUser] = useState<SessionUser | null>(null)
 
   const navigate = (nextPage: PageName) => {
     setPage(nextPage)
@@ -422,10 +424,17 @@ function App() {
     return () => window.removeEventListener('popstate', handlePopState)
   }, [])
 
+  useEffect(() => {
+    fetch('/api/auth/me', { credentials: 'include' })
+      .then(response => response.ok ? response.json() : null)
+      .then(session => setUser(session))
+      .catch(() => setUser(null))
+  }, [])
+
   return <div className="app-shell" data-theme={theme.toLowerCase()}>
     <Header theme={theme} setTheme={setTheme} toggleSidebar={() => setSidebarCollapsed(value => !value)} />
     <Sidebar active={page} navigate={navigate} collapsed={sidebarCollapsed} />
-    <main className={sidebarCollapsed ? 'wide' : ''}><PageContent page={page} theme={theme} /><footer className="app-footer"><span>Created by <strong>Prateek Mishra</strong> 2026</span><span>◉ ◌ ◈ ◍</span></footer></main>
+    <main className={sidebarCollapsed ? 'wide' : ''}><PageContent page={page} theme={theme} user={user} setUser={setUser} navigate={navigate} /><footer className="app-footer"><span>Created by <strong>Prateek Mishra</strong> 2026</span><span>◉ ◌ ◈ ◍</span></footer></main>
   </div>
 }
 
